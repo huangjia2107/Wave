@@ -1,0 +1,37 @@
+<Project>
+
+	<PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Version>1.0.0</Version>
+		<LangVersion>latest</LangVersion>
+		<Copyright>Copyright © 2022-$([System.DateTime]::Now.Year)</Copyright>
+		<Authors>huangjia2107</Authors>
+		<IncludeSymbols>True</IncludeSymbols>
+		<IncludeSource>True</IncludeSource>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/huangjia2107/Wave</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/huangjia2107/Wave</PackageProjectUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<WavePackageIcon>$(MSBuildThisFileDirectory)images/Wave-logo.png</WavePackageIcon>
+		<WaveLicenseFile>$(MSBuildThisFileDirectory)LICENSE</WaveLicenseFile>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<IsUdpProject>$(MSBuildProjectName.EndsWith('Udp'))</IsUdpProject>
+
+		<Version Condition=" '$(IsUdpProject)' == 'True' ">0.0.1-preview</Version>
+		<Description Condition=" '$(IsUdpProject)' == 'True' ">This is a udp library</Description>
+		<PackageTags Condition=" '$(IsUdpProject)' == 'True' ">wave;udp;communication;network</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(IsUdpProject)' == 'True' ">
+		<None Include="$(WavePackageIcon)" Visible="False" Pack="True" PackagePath=""/>
+		<None Include="$(WaveLicenseFile)" Visible="False" Pack="True" PackagePath=""/>
+	</ItemGroup>
+
+</Project>

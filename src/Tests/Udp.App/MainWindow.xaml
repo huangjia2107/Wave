@@ -1,0 +1,198 @@
+﻿<Window x:Class="Udp.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:utils="clr-namespace:Udp.App.Utils"
+        Title="UDP" Height="560" Width="1000" MinHeight="560" MinWidth="1000" Background="#f3f3f3" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <utils:BoolConverter x:Key="BoolConverterKey"/>
+        <utils:BoolOrBoolToBoolMultiConverter x:Key="BoolOrBoolToBoolMultiConverterKey"/>
+    </Window.Resources>
+    <Grid Margin="15,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="50"/>
+            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="300" MinWidth="300"/>
+        </Grid.ColumnDefinitions>
+
+        <GridSplitter Grid.Column="1" Width="15" Background="Transparent"
+			          HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+        <Border Grid.Column="0" Background="#fbfbfb" CornerRadius="4" Margin="0,15" Padding="15" BorderThickness="0,0,1,1" BorderBrush="LightGray">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition MinHeight="50"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition MinHeight="50"/>
+                </Grid.RowDefinitions>
+
+                <GridSplitter Grid.Row="1" Height="15" Background="Transparent"
+			                  HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                
+                <ScrollViewer x:Name="ReceiveScrollViewer" Background="#ffffff" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ReceivedCollection}" IsHitTestVisible="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding .,StringFormat=⌾{0}}" TextWrapping="Wrap" IsHitTestVisible="False"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBox Grid.Row="2" Padding="3" Margin="1"
+                         Text="{Binding SendText,UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Column="2" Grid.IsSharedSizeScope="True">
+            <Border Background="#fbfbfb" CornerRadius="4" Margin="0,15,0,0" Padding="15,10,15,15" BorderThickness="0,0,1,1" BorderBrush="LightGray">
+                <StackPanel>
+                    <StackPanel.IsEnabled>
+                        <MultiBinding Converter="{StaticResource BoolOrBoolToBoolMultiConverterKey}">
+                            <Binding Path="IsListening"/>
+                            <Binding Path="IsSending"/>
+                        </MultiBinding>
+                    </StackPanel.IsEnabled>
+                    <TextBlock Text="Address" FontWeight="Bold"/>
+                    <Path Margin="-15,10" Stretch="Fill" StrokeThickness="1" Stroke="#EEEDF2" Data="M0,0 H5" RenderOptions.EdgeMode="Aliased"/>
+                    <Grid Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="NameColumn"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="IP" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" VerticalContentAlignment="Center" TextAlignment="Right" Padding="3,0"
+                                 Text="{Binding Ip,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+                    <Grid Height="25" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="NameColumn"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Port" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" VerticalContentAlignment="Center" TextAlignment="Right" Padding="3,0"
+                                 Text="{Binding Port,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+                </StackPanel>
+                
+            </Border>
+
+            <Border Background="#fbfbfb" CornerRadius="4" Margin="0,15,0,0" Padding="15,10,15,15" BorderThickness="0,0,1,1" BorderBrush="LightGray">
+                <StackPanel>
+                    <Grid Height="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Receive" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" MinWidth="50" Content="{Binding ReceivedCount}"
+                                Click="ClearReceivedCount_Click"/>
+                    </Grid>
+                    <Path Margin="-15,10" Stretch="Fill" StrokeThickness="1" Stroke="#EEEDF2" Data="M0,0 H5" RenderOptions.EdgeMode="Aliased"/>
+                    <Grid Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Content="String" 
+                                     IsChecked="{Binding ReceivedStringSwitch,Mode=TwoWay}"/>
+                        <RadioButton Content="Hex" Grid.Column="2"/>
+                    </Grid>
+                    
+                    <Grid Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="NameColumn"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Latest" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" VerticalContentAlignment="Center" TextAlignment="Right" Padding="3,0"
+                                 Text="{Binding ReceivedLatest,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+
+                    <Grid Height="30" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Listen" Click="StartListen_Click"
+                                IsEnabled="{Binding IsListening,Converter={StaticResource BoolConverterKey}}"/>
+                        <Button Grid.Column="2" Content="Stop" Click="StopListen_Click"
+                                IsEnabled="{Binding IsListening}"/>
+                    </Grid>
+                </StackPanel>
+
+            </Border>
+
+            <Border Background="#fbfbfb" CornerRadius="4" Margin="0,15,0,0" Padding="15,10,15,15" BorderThickness="0,0,1,1" BorderBrush="LightGray">
+                <StackPanel>
+                    <Grid Height="20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Send" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" MinWidth="50" Content="{Binding SendCount}" 
+                                Click="ClearSendCount_Click"/>
+                    </Grid>
+                    <Path Margin="-15,10" Stretch="Fill" StrokeThickness="1" Stroke="#EEEDF2" Data="M0,0 H5" RenderOptions.EdgeMode="Aliased"/>
+                    <Grid Height="25" 
+                          IsEnabled="{Binding IsSending,Converter={StaticResource BoolConverterKey}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Content="String"
+                                     IsChecked="{Binding SendStringSwitch,Mode=TwoWay}"
+                                     Click="SendEncode_Click"/>
+                        <RadioButton Content="Hex" Grid.Column="2"
+                                     Click="SendEncode_Click"/>
+                    </Grid>
+                    <Grid Height="25"
+                          IsEnabled="{Binding IsSending,Converter={StaticResource BoolConverterKey}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="NameColumn"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Times" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" VerticalContentAlignment="Center" TextAlignment="Right" Padding="3,0"
+                                 Text="{Binding SendTimes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+                    <Grid Height="25" Margin="0,10,0,0"
+                          IsEnabled="{Binding IsSending,Converter={StaticResource BoolConverterKey}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="NameColumn"/>
+                            <ColumnDefinition Width="5"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Interval" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="2" VerticalContentAlignment="Center" TextAlignment="Right" Padding="3,0"
+                                 Text="{Binding SendInterval,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+                    <Grid Height="30" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="Send" Click="StartSend_Click"
+                                IsEnabled="{Binding IsSending,Converter={StaticResource BoolConverterKey}}"/>
+                        <Button Grid.Column="2" Content="Stop" Click="StopSend_Click"
+                                IsEnabled="{Binding IsSending}"/>
+                    </Grid>
+                </StackPanel>
+
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
