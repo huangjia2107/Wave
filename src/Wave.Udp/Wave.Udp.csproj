@@ -5,7 +5,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="..\Wave.Core\Wave.Core.csproj" />
+		<ProjectReference Include="..\Wave.Toolkit\Wave.Toolkit.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.Extensions.Primitives;
 
-namespace Wave.Core.CancellationTokens
+namespace Wave.Toolkit.CancellationTokens
 {
     public class ReusableCancellationToken : IChangeToken
     {

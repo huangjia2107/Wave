@@ -3,6 +3,7 @@
 Chcp 65001
 
 $udpProjectName = "Wave.Udp"
+$coreProjectName = "Wave.Toolkit"
 
 # 发布目录
 $targetPath = "..\publish"
@@ -17,4 +18,5 @@ if(Test-Path $targetPath)
 }
 
 # 5.发布 Package
+dotnet pack -c Release -o $packPath\ ..\src\$coreProjectName\$coreProjectName.csproj
 dotnet pack -c Release -o $packPath\ ..\src\$udpProjectName\$udpProjectName.csproj

@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace Wave.Core.CancellationTokens
+namespace Wave.Toolkit.CancellationTokens
 {
     public class ReusableCancellationTokenProvider
     {

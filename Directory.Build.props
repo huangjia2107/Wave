@@ -16,20 +16,26 @@
 		<RepositoryUrl>https://github.com/huangjia2107/Wave</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/huangjia2107/Wave</PackageProjectUrl>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<WavePackageIcon>$(MSBuildThisFileDirectory)images/Wave-logo.png</WavePackageIcon>
+		<PackageIcon>wave-logo.png</PackageIcon>
+		<WavePackageIcon>$(MSBuildThisFileDirectory)images/wave-logo.png</WavePackageIcon>
 		<WaveLicenseFile>$(MSBuildThisFileDirectory)LICENSE</WaveLicenseFile>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<IsUdpProject>$(MSBuildProjectName.EndsWith('Udp'))</IsUdpProject>
+		<IsToolkitProject>$(MSBuildProjectName.EndsWith('Toolkit'))</IsToolkitProject>
 
-		<Version Condition=" '$(IsUdpProject)' == 'True' ">0.0.1-preview</Version>
+		<Version Condition=" '$(IsToolkitProject)' == 'True' ">0.0.2-preview</Version>
+		<Description Condition=" '$(IsToolkitProject)' == 'True' ">This is a toolkit library</Description>
+		<PackageTags Condition=" '$(IsToolkitProject)' == 'True' ">wave;toolkit;communication;network</PackageTags>
+		
+		<Version Condition=" '$(IsUdpProject)' == 'True' ">0.0.2-preview</Version>
 		<Description Condition=" '$(IsUdpProject)' == 'True' ">This is a udp library</Description>
 		<PackageTags Condition=" '$(IsUdpProject)' == 'True' ">wave;udp;communication;network</PackageTags>
 	</PropertyGroup>
 
-	<ItemGroup Condition=" '$(IsUdpProject)' == 'True' ">
+	<ItemGroup Condition=" '$(IsUdpProject)' == 'True' Or '$(IsToolkitProject)' == 'True' ">
 		<None Include="$(WavePackageIcon)" Visible="False" Pack="True" PackagePath=""/>
 		<None Include="$(WaveLicenseFile)" Visible="False" Pack="True" PackagePath=""/>
 	</ItemGroup>

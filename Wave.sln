@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{16AEA0
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wave.Core", "src\Wave.Core\Wave.Core.csproj", "{A80EB2CB-C172-437D-AFA3-F027043C4523}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wave.Toolkit", "src\Wave.Toolkit\Wave.Toolkit.csproj", "{A80EB2CB-C172-437D-AFA3-F027043C4523}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C193ABCF-17F9-4AE8-8A40-E32A3E5B4CA8}"
 EndProject

@@ -11,8 +11,8 @@ using System.Text.RegularExpressions;
 
 using Wave.Udp;
 using Wave.Udp.Models;
-using Wave.Core.Text;
-using Wave.Core.Extensions;
+using Wave.Toolkit.Text;
+using Wave.Toolkit.Extensions;
 
 namespace Udp.App
 {
@@ -203,29 +203,7 @@ namespace Udp.App
             }
             else
             {
-                var charCount = byteCount * 2;
-                var splitCount = byteCount - 1;
-
-                var vsb = new ValueStringBuilder(stackalloc char[charCount + splitCount]);
-                var reader = new SequenceReader<byte>(ros);
-
-                while (true)
-                {
-                    if (!reader.TryRead(out byte b))
-                        break;
-
-                    vsb.Append(b.ToString("X2"));
-
-                    if (reader.End)
-                        break;
-
-                    vsb.Append(' ');
-                }
-
-                var result = vsb.ToString();
-                vsb.Dispose();
-
-                ShowReceivedBytes(result);
+                ShowReceivedBytes(ros.ToHexString());
             }
         }
 

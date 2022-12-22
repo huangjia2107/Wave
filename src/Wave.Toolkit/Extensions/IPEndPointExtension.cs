@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Wave.Core.Extensions
+namespace Wave.Toolkit.Extensions
 {
     public static class IPEndPointExtension
     {

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks;
 #endif
 
-using Wave.Core.CancellationTokens;
+using Wave.Toolkit.CancellationTokens;
 using Wave.Udp.Models;
 
 namespace Wave.Udp

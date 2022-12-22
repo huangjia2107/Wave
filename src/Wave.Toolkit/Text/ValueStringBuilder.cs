@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace Wave.Core.Text
+namespace Wave.Toolkit.Text
 {
     public ref partial struct ValueStringBuilder
     {

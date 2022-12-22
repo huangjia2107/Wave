@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using Wave.Toolkit.Text;
 
-namespace Wave.Core.Extensions
+namespace Wave.Toolkit.Extensions
 {
     public static class ReadOnlySequenceExtension
     {
@@ -15,7 +16,7 @@ namespace Wave.Core.Extensions
                 throw new ArgumentException($"{nameof(delimiter)} is empty", nameof(delimiter));
 
             var reader = new SequenceReader<byte>(source);
-            
+
 #if NET6_0_OR_GREATER
             if (reader.TryReadTo(out ReadOnlySpan<byte> value, delimiter, true))
 #else
@@ -110,6 +111,34 @@ namespace Wave.Core.Extensions
 
             return index - offset;
         }
-    }
 
+        public static string ToHexString(this ReadOnlySequence<byte> source)
+        {
+            var byteCount = (int)source.Length;
+
+            var charCount = byteCount * 2;
+            var splitCount = byteCount - 1;
+
+            var vsb = new ValueStringBuilder(stackalloc char[charCount + splitCount]);
+            var reader = new SequenceReader<byte>(source);
+
+            while (true)
+            {
+                if (!reader.TryRead(out byte b))
+                    break;
+
+                vsb.Append(b.ToString("X2"));
+
+                if (reader.End)
+                    break;
+
+                vsb.Append(' ');
+            }
+
+            var result = vsb.ToString();
+            vsb.Dispose();
+
+            return result;
+        }
+    }
 }
