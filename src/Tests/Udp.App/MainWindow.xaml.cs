@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 
 using Wave.Udp;
 using Wave.Udp.Models;
-using Wave.Toolkit.Text;
 using Wave.Toolkit.Extensions;
 
 namespace Udp.App
@@ -163,20 +162,31 @@ namespace Udp.App
 #if NET6_0_OR_GREATER
         private async void StartListen_Click(object sender, RoutedEventArgs e)
         {
-            await _udpEndpoint.Start(Ip, _port).ConfigureAwait(false);
+            try
+            {
+                await _udpEndpoint.Start(Ip, _port).ConfigureAwait(false);
 #else
         private void StartListen_Click(object sender, RoutedEventArgs e)
         {
-            _udpEndpoint.Start(Ip, _port);
+            try
+            {
+                _udpEndpoint.Start(Ip, _port);
 #endif
-
-            IsListening = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "UDP", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsListening = _udpEndpoint.IsListening;
+            }
         }
 
         private void StopListen_Click(object sender, RoutedEventArgs e)
         {
             _udpEndpoint.Stop();
-            IsListening = false;
+            IsListening = _udpEndpoint.IsListening;
         }
 
         private void ClearReceivedCount_Click(object sender, RoutedEventArgs e)
@@ -273,6 +283,12 @@ namespace Udp.App
         private void ClearSendCount_Click(object sender, RoutedEventArgs e)
         {
             SendCount = 0;
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            _udpEndpoint?.Stop();
+            _udpEndpoint?.Dispose();
         }
 
         #endregion

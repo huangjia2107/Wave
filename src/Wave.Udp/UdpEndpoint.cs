@@ -17,7 +17,6 @@ namespace Wave.Udp
 {
     public class UdpEndpoint : IDisposable
     {
-        private bool _isListening = false;
         private Socket _serverSocket = null;
         private SocketAsyncEventArgs _recvArgs = null;
 
@@ -48,6 +47,8 @@ namespace Wave.Udp
 
         #region Property
 
+        public bool IsListening { get; private set; }
+
         private int _maxDatagramSize = 65527;
         public int MaxDatagramSize
         {
@@ -60,9 +61,9 @@ namespace Wave.Udp
         #region Receive
 
 #if NET6_0_OR_GREATER
-        public async Task Start(string ip, int port)
+        public async Task Start(string ip, int port, Action<Socket> config = null)
 #else
-        public void Start(string ip, int port)
+        public void Start(string ip, int port, Action<Socket> config = null)
 #endif
         {
             if (string.IsNullOrWhiteSpace(ip))
@@ -76,33 +77,46 @@ namespace Wave.Udp
 
             try
             {
-                _isListening = true;
+                IsListening = true;
 
                 _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 _serverSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
+
+                config?.Invoke(_serverSocket);
+
                 _serverSocket.Bind(new IPEndPoint(address, port));
 
 #if NET6_0_OR_GREATER
                 await StartReceiving().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                IsListening = false;
+            }
 #else
                 StartReceiving();
-#endif
             }
-            catch
+            catch (Exception ex)
             {
-                _isListening = false;
+                IsListening = false;
+                throw ex;
             }
+#endif
         }
 
         public void Stop()
         {
-            if (!_isListening)
+            if (!IsListening)
                 return;
 
             _cancellationTokenProvider.Cancel();
             DisposeServer();
 
-            _isListening = false;
+            IsListening = false;
         }
 
 #if NET6_0_OR_GREATER
@@ -133,7 +147,7 @@ namespace Wave.Udp
                 }
                 catch
                 {
-                    _isListening = false;
+                    IsListening = false;
                     DisposeServer();
                 }
             }, _cancellationTokenProvider.CancellationToken.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -182,21 +196,21 @@ namespace Wave.Udp
 
         #region Send
 
-        public void Send(string ip, int port, string text, short ttl = 64)
+        public void Send(string ip, int port, string text, short ttl = 64, Action<UdpClient> config = null)
         {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException(nameof(text));
 
             var data = Encoding.UTF8.GetBytes(text);
-            Send(ip, port, data, data.Length, ttl);
+            Send(ip, port, data, data.Length, ttl, config);
         }
 
-        public void Send(string ip, int port, byte[] data, short ttl = 64)
+        public void Send(string ip, int port, byte[] data, short ttl = 64, Action<UdpClient> config = null)
         {
-            Send(ip, port, data, data.Length, ttl);
+            Send(ip, port, data, data.Length, ttl, config);
         }
 
-        public void Send(string ip, int port, byte[] data, int bytes, short ttl = 64)
+        public void Send(string ip, int port, byte[] data, int bytes, short ttl = 64, Action<UdpClient> config = null)
         {
             if (string.IsNullOrEmpty(ip))
                 throw new ArgumentNullException(nameof(ip));
@@ -213,24 +227,24 @@ namespace Wave.Udp
             if (ttl < 0)
                 throw new ArgumentOutOfRangeException(nameof(ttl));
 
-            SendInternal(ip, port, data, bytes, ttl);
+            SendInternal(ip, port, data, bytes, ttl, config);
         }
 
-        public async Task SendAsync(string ip, int port, string text, short ttl = 64)
+        public async Task SendAsync(string ip, int port, string text, short ttl = 64, Action<UdpClient> config = null)
         {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException(nameof(text));
 
             var data = Encoding.UTF8.GetBytes(text);
-            await SendAsync(ip, port, data, data.Length, ttl).ConfigureAwait(false);
+            await SendAsync(ip, port, data, data.Length, ttl, config).ConfigureAwait(false);
         }
 
-        public async Task SendAsync(string ip, int port, byte[] data, short ttl = 64)
+        public async Task SendAsync(string ip, int port, byte[] data, short ttl = 64, Action<UdpClient> config = null)
         {
-            await SendAsync(ip, port, data, data.Length, ttl).ConfigureAwait(false);
+            await SendAsync(ip, port, data, data.Length, ttl, config).ConfigureAwait(false);
         }
 
-        public async Task SendAsync(string ip, int port, byte[] data, int bytes, short ttl = 64)
+        public async Task SendAsync(string ip, int port, byte[] data, int bytes, short ttl = 64, Action<UdpClient> config = null)
         {
             if (string.IsNullOrEmpty(ip))
                 throw new ArgumentNullException(nameof(ip));
@@ -247,10 +261,10 @@ namespace Wave.Udp
             if (ttl < 0)
                 throw new ArgumentOutOfRangeException(nameof(ttl));
 
-            await SendInternalAsync(ip, port, data, bytes, ttl).ConfigureAwait(false);
+            await SendInternalAsync(ip, port, data, bytes, ttl, config).ConfigureAwait(false);
         }
 
-        private void SendInternal(string ip, int port, byte[] data, int bytes, short ttl)
+        private void SendInternal(string ip, int port, byte[] data, int bytes, short ttl, Action<UdpClient> config = null)
         {
             _sendLock.Wait();
 
@@ -258,6 +272,8 @@ namespace Wave.Udp
 
             try
             {
+                config?.Invoke(_udpClient);
+
                 _udpClient.Ttl = ttl;
                 _udpClient.Send(data, bytes, ipe);
             }
@@ -267,7 +283,7 @@ namespace Wave.Udp
             }
         }
 
-        private async Task SendInternalAsync(string ip, int port, byte[] data, int bytes, short ttl)
+        private async Task SendInternalAsync(string ip, int port, byte[] data, int bytes, short ttl, Action<UdpClient> config = null)
         {
             await _sendLock.WaitAsync();
 
@@ -275,6 +291,8 @@ namespace Wave.Udp
 
             try
             {
+                config?.Invoke(_udpClient);
+
                 _udpClient.Ttl = ttl;
                 await _udpClient.SendAsync(data, bytes, ipe).ConfigureAwait(false);
             }
@@ -326,7 +344,8 @@ namespace Wave.Udp
             _serverSocket?.Close();
             _serverSocket = null;
 
-            _arrayPool.Return(_receivedBuffer);
+            if (_receivedBuffer != null)
+                _arrayPool.Return(_receivedBuffer);
         }
 
         #endregion
